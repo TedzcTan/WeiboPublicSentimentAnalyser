@@ -67,59 +67,47 @@ uv run python ../.claude/skills/weibo-sentiment-classifier/scripts/sentiment_cla
 
 - 输出 EXCEL 文件自动在同目录生成（`{json_basename}_情感分析.xlsx`）
 - 命令行会打印处理总结（帖子数、评论数），记录备用
-- **重要**：情感分类的完整分布（正面/负面/中性数量和占比）需通过读取 EXCEL 文件的"汇总" Sheet 获取。在第五步中使用以下命令读取：
-
-```bash
-cd MediaCrawler
-uv run python -c "
-from openpyxl import load_workbook
-wb = load_workbook('{EXCEL文件路径}')
-ws = wb['汇总']
-# 打印所有行
-for row in ws.iter_rows(values_only=True):
-    print(row)
-"
-```
+- 如果跨天产生多个 JSON 文件，需要分别对每个文件调用情感分类
 
 ### 第四步：话题聚类
 
-使用 Skill 工具调用 `weibo-topic-clusterer` 技能，传入第二步输出的 JSON 文件路径。
+使用 `weibo-topic-clusterer` 技能的 `extract_comments.py` 脚本提取代表评论：
 
-该技能会返回核心关切话题列表，每个话题包含：
+```bash
+cd MediaCrawler
+uv run python ../.claude/skills/weibo-topic-clusterer/scripts/extract_comments.py \
+    --input "{第二步输出的JSON文件1}" \
+    --input "{第二步输出的JSON文件2}" \
+    --sentiment "{第三步输出的EXCEL文件1}" \
+    --sentiment "{第三步输出的EXCEL文件2}" \
+    --max-comments 200 --format text
+```
+
+将提取的评论文本提供给 Claude AI 进行语义聚类，归纳 3-5 个核心话题，每个话题包含：
 - 话题名称
 - 提及次数
 - 情感倾向
 - 代表评论
 
-**注意**：话题聚类由 Claude AI 在上下文中完成，需要先 Read JSON 文件加载评论数据。
-
 ### 第五步：计算补充统计数据
 
-读取第二步输出的 JSON 文件，计算以下指标：
+使用 `compute_stats.py` 脚本一次性计算所有统计数据：
 
-#### 5.1 帖子热度指数
-
-对每个帖子计算热度指数：
+```bash
+cd MediaCrawler
+uv run python ../.claude/skills/weibo-opinion-analyzer/scripts/compute_stats.py \
+    --input "{第二步输出的JSON文件1}" \
+    --input "{第二步输出的JSON文件2}" \
+    --sentiment "{第三步输出的EXCEL文件1}" \
+    --sentiment "{第三步输出的EXCEL文件2}" \
+    --top-n 3
 ```
-热度指数 = comments_count_on_post × 0.4 + attitudes_count × 0.3 + reposts_count × 0.3
-```
 
-按热度指数降序排列，取 TOP3。
-
-#### 5.2 全局统计汇总
-
-| 指标 | 来源 |
-|---|---|
-| 微博数量 | JSON 数组长度（帖子数） |
-| 总评论数 | 所有帖子 `comments_count_on_post` 之和 |
-| 总点赞数 | 所有帖子 `attitudes_count` 之和 |
-| 总转发数 | 所有帖子 `reposts_count` 之和 |
-| 有效评论数 | 所有帖子 `total_after_filter` 之和 |
-
-#### 5.3 用户情感分布汇总
-
-汇总第三步情感分类的结果，计算所有评论的整体正面/负面/中性占比。
-从第三步的 EXCEL 明细数据或命令行输出中获取。
+脚本输出 JSON，包含：
+- `global_stats`：微博数量、总评论数、总点赞数、总转发数、有效评论数
+- `top_posts`：TOP3 热门帖子（含热度指数 = 评论数×0.4 + 点赞数×0.3 + 转发数×0.3，情感分布，代表评论）
+- `sentiment_distribution`：正面/负面/中性数量及占比
+- `representative_comments`：供话题聚类使用的采样评论
 
 ### 第六步：生成 Markdown 报告
 

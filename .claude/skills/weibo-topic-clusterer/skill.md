@@ -8,22 +8,41 @@ description: 对微博评论进行AI语义聚类，提取核心关切话题及�
 读取微博评论爬虫输出的 JSON 文件，对所有评论进行 AI 语义聚类分析，
 识别用户最关心的核心话题，输出结构化的话题分析结果。
 
-本技能无独立脚本，完全由 AI 上下文分析完成。
+## 前置脚本
+
+使用 `scripts/extract_comments.py` 从 JSON 中提取代表性评论，供 AI 聚类使用：
+
+```bash
+cd MediaCrawler
+uv run python ../.claude/skills/weibo-topic-clusterer/scripts/extract_comments.py \
+    --input "../WeiboExtractData/深圳天气/2026-05-20/深圳天气_20260520.json" \
+    --input "../WeiboExtractData/深圳天气/2026-05-21/深圳天气_20260521.json" \
+    --sentiment "../WeiboExtractData/深圳天气/2026-05-20/深圳天气_20260520_情感分析.xlsx" \
+    --max-comments 200 --format text
+```
+
+参数说明：
+| 参数 | 说明 |
+|---|---|
+| `--input` / `-i` | 爬取结果 JSON 文件（可多次指定） |
+| `--sentiment` / `-s` | 情感分类 EXCEL 文件（可选，可多次指定） |
+| `--max-comments` / `-n` | 最大提取评论数（默认 200） |
+| `--format` | 输出格式：`json` 或 `text`（纯文本，适合 AI 阅读） |
 
 ## 输入
 
-微博评论爬虫输出的 JSON 文件路径。
+微博评论爬虫输出的 JSON 文件路径。可通过 `extract_comments.py` 预处理后输入。
 
 ## 分析流程
 
-### 1. 读取数据
+### 1. 准备数据
 
-读取 JSON 文件，提取所有帖子下的所有评论。评论数据在 `comments` 数组中，
-每条记录的 `content` 字段为评论文本。
+运行 `extract_comments.py` 提取代表性评论（按点赞数排序 + 随机采样），
+将输出的评论文本加载到上下文中。
 
 ### 2. 全量评论扫描
 
-统计评论总数（total_after_filter），将所有评论内容和出现频次加载到上下文中。
+统计评论总数，将 `extract_comments.py` 输出的评论内容和上下文加载到上下文中。
 
 ### 3. 语义聚类
 

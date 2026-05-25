@@ -1,18 +1,18 @@
 {
   "meta": {
     "version": 3,
-    "total_runs": 3,
-    "total_comments_analyzed": 253,
+    "total_runs": 5,
+    "total_comments_analyzed": 3562,
     "created_at": "2026-05-23",
-    "last_updated": "2026-05-23 11:50"
+    "last_updated": "2026-05-25 22:49"
   },
   "positive_words": {
     "喜欢": {
-      "count": 0,
+      "count": 3,
       "added_in_version": 1
     },
     "爱": {
-      "count": 2,
+      "count": 4,
       "added_in_version": 1
     },
     "热爱": {
@@ -44,7 +44,7 @@
       "added_in_version": 1
     },
     "谢谢": {
-      "count": 0,
+      "count": 10,
       "added_in_version": 1
     },
     "感谢": {
@@ -56,11 +56,11 @@
       "added_in_version": 1
     },
     "谢": {
-      "count": 0,
+      "count": 1,
       "added_in_version": 1
     },
     "感恩": {
-      "count": 0,
+      "count": 2,
       "added_in_version": 1
     },
     "感动": {
@@ -68,23 +68,23 @@
       "added_in_version": 1
     },
     "期待": {
-      "count": 0,
+      "count": 3,
       "added_in_version": 1
     },
     "盼望": {
-      "count": 0,
+      "count": 1,
       "added_in_version": 1
     },
     "希望": {
-      "count": 0,
+      "count": 29,
       "added_in_version": 1
     },
     "想要": {
-      "count": 0,
+      "count": 1,
       "added_in_version": 1
     },
     "好想": {
-      "count": 1,
+      "count": 5,
       "added_in_version": 1
     },
     "真想": {
@@ -92,7 +92,7 @@
       "added_in_version": 1
     },
     "很好": {
-      "count": 0,
+      "count": 2,
       "added_in_version": 1
     },
     "太好": {
@@ -100,7 +100,7 @@
       "added_in_version": 1
     },
     "真好": {
-      "count": 0,
+      "count": 1,
       "added_in_version": 1
     },
     "极好": {
@@ -112,11 +112,11 @@
       "added_in_version": 1
     },
     "好好": {
-      "count": 1,
+      "count": 6,
       "added_in_version": 1
     },
     "不错": {
-      "count": 0,
+      "count": 1,
       "added_in_version": 1
     },
     "非常好": {
@@ -128,7 +128,7 @@
       "added_in_version": 1
     },
     "棒": {
-      "count": 0,
+      "count": 1,
       "added_in_version": 1
     },
     "很棒": {
@@ -144,7 +144,7 @@
       "added_in_version": 1
     },
     "赞": {
-      "count": 0,
+      "count": 2,
       "added_in_version": 1
     },
     "超赞": {
@@ -156,7 +156,7 @@
       "added_in_version": 1
     },
     "给力": {
-      "count": 0,
+      "count": 1,
       "added_in_version": 1
     },
     "给力哦": {
@@ -164,11 +164,11 @@
       "added_in_version": 1
     },
     "厉害": {
-      "count": 0,
+      "count": 3,
       "added_in_version": 1
     },
     "牛": {
-      "count": 0,
+      "count": 47,
       "added_in_version": 1
     },
     "真牛": {
@@ -180,11 +180,11 @@
       "added_in_version": 1
     },
     "牛逼": {
-      "count": 0,
+      "count": 2,
       "added_in_version": 1
     },
     "666": {
-      "count": 1,
+      "count": 2,
       "added_in_version": 1
     },
     "六六六": {
@@ -196,7 +196,7 @@
       "added_in_version": 1
     },
     "完美": {
-      "count": 0,
+      "count": 1,
       "added_in_version": 1
     },
     "完美啊": {
@@ -212,7 +212,7 @@
       "added_in_version": 1
     },
     "到位": {
-      "count": 0,
+      "count": 2,
       "added_in_version": 1
     },
     "漂亮": {
@@ -232,7 +232,7 @@
       "added_in_version": 1
     },
     "帅": {
-      "count": 0,
+      "count": 1,
       "added_in_version": 1
     },
     "帅气": {
@@ -240,7 +240,7 @@
       "added_in_version": 1
     },
     "美": {
-      "count": 0,
+      "count": 2,
       "added_in_version": 1
     },
     "太美": {
@@ -252,11 +252,11 @@
       "added_in_version": 1
     },
     "靠谱": {
-      "count": 0,
+      "count": 4,
       "added_in_version": 1
     },
     "专业": {
-      "count": 0,
+      "count": 9,
       "added_in_version": 1
     },
     "敬业": {
@@ -272,7 +272,7 @@
       "added_in_version": 1
     },
     "暖": {
-      "count": 0,
+      "count": 6,
       "added_in_version": 1
     },
     "温暖": {
@@ -280,7 +280,7 @@
       "added_in_version": 1
     },
     "温馨": {
-      "count": 0,
+      "count": 1,
       "added_in_version": 1
     },
     "暖和": {
@@ -288,7 +288,7 @@
       "added_in_version": 1
     },
     "舒服": {
-      "count": 2,
+      "count": 5,
       "added_in_version": 1
     },
     "舒适": {
@@ -300,7 +300,7 @@
       "added_in_version": 1
     },
     "爽": {
-      "count": 0,
+      "count": 2,
       "added_in_version": 1
     },
     "凉爽": {
@@ -308,11 +308,11 @@
       "added_in_version": 1
     },
     "凉快": {
-      "count": 0,
+      "count": 4,
       "added_in_version": 1
     },
     "方便": {
-      "count": 0,
+      "count": 2,
       "added_in_version": 1
     },
     "实用": {
@@ -324,7 +324,7 @@
       "added_in_version": 1
     },
     "有用": {
-      "count": 0,
+      "count": 3,
       "added_in_version": 1
     },
     "有趣": {
@@ -332,15 +332,15 @@
       "added_in_version": 1
     },
     "有意思": {
-      "count": 0,
+      "count": 3,
       "added_in_version": 1
     },
     "好玩": {
-      "count": 0,
+      "count": 1,
       "added_in_version": 1
     },
     "开心": {
-      "count": 0,
+      "count": 2,
       "added_in_version": 1
     },
     "高兴": {
@@ -348,11 +348,11 @@
       "added_in_version": 1
     },
     "快乐": {
-      "count": 0,
+      "count": 1,
       "added_in_version": 1
     },
     "幸福": {
-      "count": 0,
+      "count": 1,
       "added_in_version": 1
     },
     "幸运": {
@@ -360,7 +360,7 @@
       "added_in_version": 1
     },
     "难得": {
-      "count": 0,
+      "count": 1,
       "added_in_version": 1
     },
     "珍贵": {
@@ -372,7 +372,7 @@
       "added_in_version": 1
     },
     "绝了": {
-      "count": 0,
+      "count": 1,
       "added_in_version": 1
     },
     "聪明": {
@@ -384,7 +384,7 @@
       "added_in_version": 1
     },
     "懂事": {
-      "count": 0,
+      "count": 3,
       "added_in_version": 1
     },
     "孝顺": {
@@ -392,7 +392,7 @@
       "added_in_version": 1
     },
     "值得": {
-      "count": 0,
+      "count": 2,
       "added_in_version": 1
     },
     "值了": {
@@ -412,11 +412,11 @@
       "added_in_version": 1
     },
     "满意": {
-      "count": 0,
+      "count": 4,
       "added_in_version": 1
     },
     "满足": {
-      "count": 0,
+      "count": 4,
       "added_in_version": 1
     },
     "知足": {
@@ -424,11 +424,11 @@
       "added_in_version": 1
     },
     "安心": {
-      "count": 4,
+      "count": 10,
       "added_in_version": 1
     },
     "放心": {
-      "count": 0,
+      "count": 13,
       "added_in_version": 1
     },
     "踏实": {
@@ -436,7 +436,7 @@
       "added_in_version": 1
     },
     "相信": {
-      "count": 0,
+      "count": 1,
       "added_in_version": 1
     },
     "信任": {
@@ -448,15 +448,15 @@
       "added_in_version": 1
     },
     "支持": {
-      "count": 0,
+      "count": 12,
       "added_in_version": 1
     },
     "加油": {
-      "count": 0,
+      "count": 8,
       "added_in_version": 1
     },
     "冲冲": {
-      "count": 0,
+      "count": 1,
       "added_in_version": 1
     },
     "安利": {
@@ -476,7 +476,7 @@
       "added_in_version": 1
     },
     "平安": {
-      "count": 0,
+      "count": 9,
       "added_in_version": 1
     },
     "健康": {
@@ -484,15 +484,15 @@
       "added_in_version": 1
     },
     "顺利": {
-      "count": 0,
+      "count": 1,
       "added_in_version": 1
     },
     "美好": {
-      "count": 0,
+      "count": 1,
       "added_in_version": 1
     },
     "好梦": {
-      "count": 8,
+      "count": 10,
       "added_in_version": 1
     },
     "美梦": {
@@ -524,11 +524,11 @@
       "added_in_version": 1
     },
     "哈哈": {
-      "count": 0,
+      "count": 9,
       "added_in_version": 1
     },
     "哈哈哈哈": {
-      "count": 0,
+      "count": 9,
       "added_in_version": 1
     },
     "笑死": {
@@ -548,11 +548,11 @@
       "added_in_version": 1
     },
     "太好了": {
-      "count": 0,
+      "count": 1,
       "added_in_version": 1
     },
     "厉害了": {
-      "count": 0,
+      "count": 1,
       "added_in_version": 1
     },
     "太绝了": {
@@ -578,7 +578,7 @@
   },
   "negative_words": {
     "讨厌": {
-      "count": 1,
+      "count": 6,
       "added_in_version": 1
     },
     "烦": {
@@ -586,11 +586,11 @@
       "added_in_version": 1
     },
     "好烦": {
-      "count": 0,
+      "count": 2,
       "added_in_version": 1
     },
     "烦人": {
-      "count": 0,
+      "count": 2,
       "added_in_version": 1
     },
     "烦死了": {
@@ -606,7 +606,7 @@
       "added_in_version": 1
     },
     "够了": {
-      "count": 3,
+      "count": 4,
       "added_in_version": 1
     },
     "受够了": {
@@ -614,7 +614,7 @@
       "added_in_version": 1
     },
     "恶心": {
-      "count": 0,
+      "count": 3,
       "added_in_version": 1
     },
     "厌恶": {
@@ -634,7 +634,7 @@
       "added_in_version": 1
     },
     "无语": {
-      "count": 0,
+      "count": 11,
       "added_in_version": 1
     },
     "无语死了": {
@@ -646,7 +646,7 @@
       "added_in_version": 1
     },
     "差": {
-      "count": 0,
+      "count": 24,
       "added_in_version": 1
     },
     "差劲": {
@@ -654,7 +654,7 @@
       "added_in_version": 1
     },
     "很差": {
-      "count": 0,
+      "count": 1,
       "added_in_version": 1
     },
     "太差": {
@@ -698,7 +698,7 @@
       "added_in_version": 1
     },
     "废": {
-      "count": 0,
+      "count": 2,
       "added_in_version": 1
     },
     "废物": {
@@ -706,7 +706,7 @@
       "added_in_version": 1
     },
     "糟": {
-      "count": 0,
+      "count": 1,
       "added_in_version": 1
     },
     "糟糕": {
@@ -718,7 +718,7 @@
       "added_in_version": 1
     },
     "坏": {
-      "count": 0,
+      "count": 2,
       "added_in_version": 1
     },
     "好坏": {
@@ -730,15 +730,15 @@
       "added_in_version": 1
     },
     "可怕": {
-      "count": 0,
+      "count": 4,
       "added_in_version": 1
     },
     "恐怖": {
-      "count": 0,
+      "count": 6,
       "added_in_version": 1
     },
     "吓人": {
-      "count": 0,
+      "count": 12,
       "added_in_version": 1
     },
     "吓死了": {
@@ -754,19 +754,19 @@
       "added_in_version": 1
     },
     "吐槽": {
-      "count": 0,
+      "count": 3,
       "added_in_version": 1
     },
     "不满": {
-      "count": 0,
+      "count": 1,
       "added_in_version": 1
     },
     "不满意": {
-      "count": 0,
+      "count": 1,
       "added_in_version": 1
     },
     "失望": {
-      "count": 0,
+      "count": 2,
       "added_in_version": 1
     },
     "好失望": {
@@ -778,7 +778,7 @@
       "added_in_version": 1
     },
     "生气": {
-      "count": 0,
+      "count": 2,
       "added_in_version": 1
     },
     "气死": {
@@ -794,7 +794,7 @@
       "added_in_version": 1
     },
     "愤怒": {
-      "count": 0,
+      "count": 2,
       "added_in_version": 1
     },
     "怒了": {
@@ -806,7 +806,7 @@
       "added_in_version": 1
     },
     "崩溃": {
-      "count": 0,
+      "count": 4,
       "added_in_version": 1
     },
     "奔溃": {
@@ -814,23 +814,23 @@
       "added_in_version": 1
     },
     "哭了": {
-      "count": 0,
+      "count": 5,
       "added_in_version": 1
     },
     "痛苦": {
-      "count": 0,
+      "count": 1,
       "added_in_version": 1
     },
     "难受": {
-      "count": 0,
+      "count": 2,
       "added_in_version": 1
     },
     "难过": {
-      "count": 0,
+      "count": 2,
       "added_in_version": 1
     },
     "伤心": {
-      "count": 0,
+      "count": 1,
       "added_in_version": 1
     },
     "心累": {
@@ -846,11 +846,11 @@
       "added_in_version": 1
     },
     "闷": {
-      "count": 2,
+      "count": 3,
       "added_in_version": 1
     },
     "闷热": {
-      "count": 4,
+      "count": 5,
       "added_in_version": 1
     },
     "闷死了": {
@@ -910,11 +910,11 @@
       "added_in_version": 1
     },
     "担心": {
-      "count": 0,
+      "count": 2,
       "added_in_version": 1
     },
     "担忧": {
-      "count": 0,
+      "count": 1,
       "added_in_version": 1
     },
     "愁": {
@@ -926,11 +926,11 @@
       "added_in_version": 1
     },
     "害怕": {
-      "count": 0,
+      "count": 4,
       "added_in_version": 1
     },
     "怕": {
-      "count": 1,
+      "count": 23,
       "added_in_version": 1
     },
     "好怕": {
@@ -938,11 +938,11 @@
       "added_in_version": 1
     },
     "紧张": {
-      "count": 0,
+      "count": 2,
       "added_in_version": 1
     },
     "不安": {
-      "count": 0,
+      "count": 8,
       "added_in_version": 1
     },
     "不放心": {
@@ -954,7 +954,7 @@
       "added_in_version": 1
     },
     "纠结": {
-      "count": 0,
+      "count": 1,
       "added_in_version": 1
     },
     "犹豫": {
@@ -970,23 +970,23 @@
       "added_in_version": 1
     },
     "服了": {
-      "count": 1,
+      "count": 4,
       "added_in_version": 1
     },
     "真的服": {
-      "count": 0,
+      "count": 4,
       "added_in_version": 1
     },
     "真是服": {
-      "count": 0,
+      "count": 4,
       "added_in_version": 1
     },
     "也是服了": {
-      "count": 0,
+      "count": 1,
       "added_in_version": 1
     },
     "受不了": {
-      "count": 0,
+      "count": 4,
       "added_in_version": 1
     },
     "忍不了": {
@@ -998,7 +998,7 @@
       "added_in_version": 1
     },
     "撑不住": {
-      "count": 0,
+      "count": 1,
       "added_in_version": 1
     },
     "难用": {
@@ -1014,11 +1014,11 @@
       "added_in_version": 1
     },
     "麻烦": {
-      "count": 1,
+      "count": 7,
       "added_in_version": 1
     },
     "很麻烦": {
-      "count": 0,
+      "count": 1,
       "added_in_version": 1
     },
     "太麻烦": {
@@ -1030,7 +1030,7 @@
       "added_in_version": 1
     },
     "丑": {
-      "count": 0,
+      "count": 1,
       "added_in_version": 1
     },
     "太丑": {
@@ -1058,11 +1058,11 @@
       "added_in_version": 1
     },
     "累": {
-      "count": 4,
+      "count": 33,
       "added_in_version": 1
     },
     "好累": {
-      "count": 0,
+      "count": 1,
       "added_in_version": 1
     },
     "累死": {
@@ -1074,7 +1074,7 @@
       "added_in_version": 1
     },
     "困": {
-      "count": 1,
+      "count": 6,
       "added_in_version": 1
     },
     "困死": {
@@ -1106,7 +1106,7 @@
       "added_in_version": 1
     },
     "骗": {
-      "count": 0,
+      "count": 1,
       "added_in_version": 1
     },
     "骗子": {
@@ -1118,15 +1118,15 @@
       "added_in_version": 1
     },
     "假的": {
-      "count": 0,
+      "count": 4,
       "added_in_version": 1
     },
     "假": {
-      "count": 1,
+      "count": 17,
       "added_in_version": 1
     },
     "坑": {
-      "count": 0,
+      "count": 2,
       "added_in_version": 1
     },
     "坑人": {
@@ -1150,15 +1150,15 @@
       "added_in_version": 1
     },
     "马后炮": {
-      "count": 0,
+      "count": 1,
       "added_in_version": 1
     },
     "事后": {
-      "count": 0,
+      "count": 2,
       "added_in_version": 1
     },
     "不如": {
-      "count": 0,
+      "count": 6,
       "added_in_version": 1
     },
     "不及时": {
@@ -1178,11 +1178,11 @@
       "added_in_version": 1
     },
     "滞后": {
-      "count": 0,
+      "count": 5,
       "added_in_version": 1
     },
     "不准": {
-      "count": 0,
+      "count": 12,
       "added_in_version": 1
     },
     "没作用": {
@@ -1210,11 +1210,11 @@
       "added_in_version": 1
     },
     "不停课": {
-      "count": 0,
+      "count": 53,
       "added_in_version": 1
     },
     "不放假": {
-      "count": 0,
+      "count": 1,
       "added_in_version": 1
     },
     "扣搜": {
@@ -1226,11 +1226,11 @@
       "added_in_version": 1
     },
     "扑街": {
-      "count": 0,
+      "count": 1,
       "added_in_version": 1
     },
     "有毒": {
-      "count": 0,
+      "count": 1,
       "added_in_version": 1
     },
     "白晒": {
@@ -1242,11 +1242,11 @@
       "added_in_version": 1
     },
     "水浸": {
-      "count": 0,
+      "count": 1,
       "added_in_version": 1
     },
     "淹": {
-      "count": 0,
+      "count": 7,
       "added_in_version": 1
     },
     "没电": {
@@ -1254,11 +1254,11 @@
       "added_in_version": 1
     },
     "回不去": {
-      "count": 0,
+      "count": 1,
       "added_in_version": 1
     },
     "有病": {
-      "count": 0,
+      "count": 2,
       "added_in_version": 1
     },
     "害人": {
@@ -1274,11 +1274,11 @@
       "added_in_version": 1
     },
     "闭嘴": {
-      "count": 0,
+      "count": 1,
       "added_in_version": 1
     },
     "被困": {
-      "count": 0,
+      "count": 2,
       "added_in_version": 1
     },
     "寸步难行": {
@@ -1290,7 +1290,7 @@
       "added_in_version": 2
     },
     "被堵": {
-      "count": 0,
+      "count": 2,
       "added_in_version": 2
     },
     "tm": {
@@ -1298,7 +1298,7 @@
       "added_in_version": 2
     },
     "什么东西": {
-      "count": 0,
+      "count": 1,
       "added_in_version": 2
     },
     "没显示": {
@@ -1306,11 +1306,11 @@
       "added_in_version": 2
     },
     "积水": {
-      "count": 0,
+      "count": 17,
       "added_in_version": 3
     },
     "没法": {
-      "count": 0,
+      "count": 9,
       "added_in_version": 3
     },
     "走不出": {
@@ -1324,15 +1324,15 @@
   },
   "neutral_greetings": {
     "早上好": {
-      "count": 0,
+      "count": 28,
       "added_in_version": 1
     },
     "早啊": {
-      "count": 0,
+      "count": 1,
       "added_in_version": 1
     },
     "早": {
-      "count": 0,
+      "count": 17,
       "added_in_version": 1
     },
     "中午好": {
@@ -1344,11 +1344,11 @@
       "added_in_version": 1
     },
     "晚上好": {
-      "count": 8,
+      "count": 9,
       "added_in_version": 1
     },
     "晚安": {
-      "count": 32,
+      "count": 52,
       "added_in_version": 1
     },
     "你好": {
@@ -1474,7 +1474,7 @@
     },
     "暴雨": {
       "first_seen": "2026-05-23 11:14",
-      "occurrence_count": 28
+      "occurrence_count": 230
     },
     "红色": {
       "first_seen": "2026-05-23 11:14",
@@ -1482,7 +1482,7 @@
     },
     "预警": {
       "first_seen": "2026-05-23 11:14",
-      "occurrence_count": 21
+      "occurrence_count": 250
     },
     "学校": {
       "first_seen": "2026-05-23 11:14",
@@ -1531,6 +1531,102 @@
     "今天": {
       "first_seen": "2026-05-23 11:14",
       "occurrence_count": 9
+    },
+    "停课": {
+      "first_seen": "2026-05-25 22:49",
+      "occurrence_count": 534
+    },
+    "明天": {
+      "first_seen": "2026-05-25 22:49",
+      "occurrence_count": 210
+    },
+    "课吗": {
+      "first_seen": "2026-05-25 22:49",
+      "occurrence_count": 129
+    },
+    "停课吗": {
+      "first_seen": "2026-05-25 22:49",
+      "occurrence_count": 128
+    },
+    "课停": {
+      "first_seen": "2026-05-25 22:49",
+      "occurrence_count": 97
+    },
+    "停课停": {
+      "first_seen": "2026-05-25 22:49",
+      "occurrence_count": 97
+    },
+    "课停课": {
+      "first_seen": "2026-05-25 22:49",
+      "occurrence_count": 96
+    },
+    "停课停课": {
+      "first_seen": "2026-05-25 22:49",
+      "occurrence_count": 96
+    },
+    "课停课停": {
+      "first_seen": "2026-05-25 22:49",
+      "occurrence_count": 87
+    },
+    "红暴": {
+      "first_seen": "2026-05-25 22:49",
+      "occurrence_count": 210
+    },
+    "天停": {
+      "first_seen": "2026-05-25 22:49",
+      "occurrence_count": 61
+    },
+    "明天停": {
+      "first_seen": "2026-05-25 22:49",
+      "occurrence_count": 60
+    },
+    "天停课": {
+      "first_seen": "2026-05-25 22:49",
+      "occurrence_count": 59
+    },
+    "大雨": {
+      "first_seen": "2026-05-25 22:49",
+      "occurrence_count": 149
+    },
+    "深圳": {
+      "first_seen": "2026-05-25 22:49",
+      "occurrence_count": 109
+    },
+    "天气": {
+      "first_seen": "2026-05-25 22:49",
+      "occurrence_count": 101
+    },
+    "早安": {
+      "first_seen": "2026-05-25 22:49",
+      "occurrence_count": 93
+    },
+    "好大": {
+      "first_seen": "2026-05-25 22:49",
+      "occurrence_count": 91
+    },
+    "现在": {
+      "first_seen": "2026-05-25 22:49",
+      "occurrence_count": 82
+    },
+    "么大": {
+      "first_seen": "2026-05-25 22:49",
+      "occurrence_count": 80
+    },
+    "这么": {
+      "first_seen": "2026-05-25 22:49",
+      "occurrence_count": 79
+    },
+    "上学": {
+      "first_seen": "2026-05-25 22:49",
+      "occurrence_count": 78
+    },
+    "预报": {
+      "first_seen": "2026-05-25 22:49",
+      "occurrence_count": 77
+    },
+    "小时": {
+      "first_seen": "2026-05-25 22:49",
+      "occurrence_count": 75
     }
   }
 }
