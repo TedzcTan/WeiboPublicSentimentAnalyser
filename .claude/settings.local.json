@@ -56,7 +56,11 @@
       "Bash(rm -rf \".claude/skills/weibo-sentiment-classifier/scripts/__pycache__\")",
       "Bash(rm -f \"/c/Users/zym/Desktop/ClaudeWorkSpace/.claude/skills/weibo-sentiment-classifier/scripts/dict_manager.py\" \"/c/Users/zym/Desktop/ClaudeWorkSpace/.claude/skills/weibo-sentiment-classifier/scripts/sentiment_dict.json\" \"/c/Users/zym/Desktop/ClaudeWorkSpace/.claude/skills/weibo-sentiment-classifier/scripts/apply_manual_fixes.py\")",
       "Bash(rm -rf \"/c/Users/zym/Desktop/ClaudeWorkSpace/.claude/skills/weibo-sentiment-classifier/scripts/__pycache__\")",
-      "Bash(git *)"
+      "Bash(git *)",
+      "Skill(update-config)",
+      "Edit",
+      "Write",
+      "Bash"
     ]
   }
 }
