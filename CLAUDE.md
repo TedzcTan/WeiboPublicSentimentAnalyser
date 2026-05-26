@@ -119,5 +119,15 @@ IP 代理池支持，提供商包括快代理、豌豆HTTP 等。
 | `weibo-opinion-analyzer` | 一键舆情分析，串联上述三步 | 日期 + 账号名 | Markdown 分析报告 |
 
 - 爬虫复用 MediaCrawler 的 `WeiboClient`，Cookie 认证，不启动浏览器
-- 情感分类基于本地词典库，每次运行后自动反思更新词库
+- 情感分类由 Claude AI 直接在对话中逐条判断，无需外部 API 或本地词典
 - 输出目录：爬取结果 → `WeiboExtractData/`，分析报告 → `舆情分析/`
+
+## CLAUDE.md 自动提交规范
+
+当 CLAUDE.md 发生修改时，自动执行 git commit，无需用户确认：
+
+```bash
+git add CLAUDE.md && git commit -m "chore: 更新 CLAUDE.md 项目文档"
+```
+
+此规范适用于所有对 CLAUDE.md 的编辑，包括新增/修改/删除内容。提交信息统一使用上述格式。
