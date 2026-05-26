@@ -51,7 +51,12 @@
       "Bash(git init *)",
       "Bash(git remote *)",
       "Bash(git add *)",
-      "Bash(git rm *)"
+      "Bash(git rm *)",
+      "Bash(rm -f \".claude/skills/weibo-sentiment-classifier/scripts/dict_manager.py\" \".claude/skills/weibo-sentiment-classifier/scripts/sentiment_dict.json\" \".claude/skills/weibo-sentiment-classifier/scripts/apply_manual_fixes.py\")",
+      "Bash(rm -rf \".claude/skills/weibo-sentiment-classifier/scripts/__pycache__\")",
+      "Bash(rm -f \"/c/Users/zym/Desktop/ClaudeWorkSpace/.claude/skills/weibo-sentiment-classifier/scripts/dict_manager.py\" \"/c/Users/zym/Desktop/ClaudeWorkSpace/.claude/skills/weibo-sentiment-classifier/scripts/sentiment_dict.json\" \"/c/Users/zym/Desktop/ClaudeWorkSpace/.claude/skills/weibo-sentiment-classifier/scripts/apply_manual_fixes.py\")",
+      "Bash(rm -rf \"/c/Users/zym/Desktop/ClaudeWorkSpace/.claude/skills/weibo-sentiment-classifier/scripts/__pycache__\")",
+      "Bash(git *)"
     ]
   }
 }

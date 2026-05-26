@@ -1,139 +1,79 @@
 #!/usr/bin/env python3
-"""微博评论情感分类器 — 基于本地词典库的置信度加权分类，输出 EXCEL 报告。"""
+"""微博评论情感分类器 — 基于 AI 模型逐条判断，输出 EXCEL 报告。"""
 
 import argparse
 import json
+import os
 import re
+import sys
+import time
 from pathlib import Path
 
-from dict_manager import DictManager
+# 每批发送给 AI 的评论数
+BATCH_SIZE = 40
 
-# 全局单例，由 analyze_file 初始化
-_dict: DictManager = None
+SYSTEM_PROMPT = """你是一个中文微博评论情感分析助手。对每条评论判断情感倾向。
+
+分类标准：
+- "正面"：表达喜欢、感谢、期待、满意、赞扬、开心、支持、感动等积极情绪
+- "负面"：表达讨厌、抱怨、担忧、愤怒、不满、讽刺、失望、质疑等消极情绪
+- "中性"：纯信息询问、客观事实陈述、中性问候、无明显情感倾向
+
+情感强度 score 范围：-1.0（极负面）到 1.0（极正面），0 表示完全中性。
+
+注意：
+- 讽刺、反语应判为负面（如"这天气预报真准"实际表达不准时）
+- 纯"晚安""早上好""你好"等问候语 → 中性
+- 仅问句无情绪词 → 中性
+- 表情符号缺失不影响判断，根据文字语义判断
+
+严格只返回 JSON 数组，格式：
+[{"index": 序号, "sentiment": "正面"|"负面"|"中性", "score": 数值}]"""
 
 
 def clean_text(text: str) -> str:
-    """清洗评论内容：去除 emoji、URL、@提及、多余空白。"""
+    """清洗评论内容：去除 URL、@提及、多余空白。"""
     text = text or ""
     text = re.sub(r"https?://\S+", "", text)
-    # 中文微博 @提及 通常以冒号或空格结束，避免吃掉后续内容
     text = re.sub(r"@[^\s@：:]+[：:]?\s*", "", text)
-    text = re.sub(r"[^一-鿿　-〿＀-￯a-zA-Z0-9,.!?;:\"\'()（）、。！？；：""''【】《》…～\s\-+]", "", text)
     text = re.sub(r"\s+", " ", text).strip()
     return text
 
 
-def classify_sentiment(text: str) -> tuple[str, float]:
-    """对单条评论进行情感分类，返回 (分类, 情感分)。
+def classify_batch(client, batch_items: list[tuple[int, str]], model: str) -> list[dict]:
+    """批量分类评论，返回 [{index, sentiment, score}]。"""
+    lines = "\n".join(f"[{idx}] {text}" for idx, text in batch_items)
 
-    使用词典管理器的置信度权重进行加权评分。
-    """
-    global _dict
-    text = clean_text(text)
-    if not text:
-        return ("中性", 0.0)
+    response = client.messages.create(
+        model=model,
+        max_tokens=4096,
+        system=SYSTEM_PROMPT,
+        messages=[{"role": "user", "content": f"请对以下评论逐一进行情感分类：\n\n{lines}"}],
+    )
 
-    # 纯问候语 → 中性
-    if _dict.is_greeting(text):
-        _dict.record_hit(text, "greeting")
-        return ("中性", 0.0)
+    text = response.content[0].text.strip()
+    # 去除可能的 markdown 代码块包裹
+    if text.startswith("```"):
+        text = re.sub(r"^```(?:json)?\s*", "", text)
+        text = re.sub(r"\s*```$", "", text)
 
-    # 字符级扫描，最长匹配 4 字词
-    n = len(text)
-    sentiment_hits = []  # (position, is_positive, word)
-
-    positive_words = _dict.get_positive_words()
-    negative_words = _dict.get_negative_words()
-
-    i = 0
-    while i < n:
-        matched = False
-        for wlen in range(min(4, n - i), 0, -1):
-            cand = text[i : i + wlen]
-            if cand in positive_words:
-                sentiment_hits.append((i, True, cand))
-                i += wlen
-                matched = True
-                break
-            elif cand in negative_words:
-                sentiment_hits.append((i, False, cand))
-                i += wlen
-                matched = True
-                break
-        if not matched:
-            i += 1
-
-    if not sentiment_hits:
-        _dict.record_unmatched(text)
-        return ("中性", 0.0)
-
-    # 问句检测
-    has_question = any(m in text for m in _dict.question_markers)
-
-    # 如果所有问句标记都在负面词内部（如"什么东西"中的"什么"），
-    # 则是斥责表达而非真正问句，不触发问句降权
-    if has_question:
-        neg_words_text = "".join(w for _, is_pos, w in sentiment_hits if not is_pos)
-        question_only_in_neg = True
-        for qm in _dict.question_markers:
-            if qm in text and qm not in neg_words_text:
-                question_only_in_neg = False
-                break
-        if question_only_in_neg:
-            has_question = False
-
-    # 置信度加权评分
-    score = 0.0
-    for pos, is_pos, word in sentiment_hits:
-        polarity = "positive" if is_pos else "negative"
-        _dict.record_hit(word, polarity)
-
-        prefix = text[max(0, pos - 2) : pos]
-        has_negator = any(neg in prefix for neg in _dict.negators)
-
-        # 基础分 × 置信度权重
-        confidence = _dict.get_confidence(word, polarity)
-        word_score = 1.0 * confidence
-
-        # 程度副词放大
-        if any(deg in prefix for deg in _dict.degree_words):
-            word_score *= 1.5
-
-        if has_negator:
-            if is_pos:
-                score -= word_score
-            # 否定 + 负面 → 缓和，不计分
-        elif has_question and is_pos and word in _dict.question_context_positive:
-            # 问句中的条件性正面词不计正面分
-            _dict.record_hit(word, "question_context")
-        else:
-            score += word_score if is_pos else -word_score
-
-    # 疑问句微弱情感 → 中性（阈值 1.0，反问句通常有更强的情感分）
-    # 连续多个问号 → 反问/质疑，不降权
-    if has_question and abs(score) <= 1.0:
-        if not re.search(r"[？?]{2,}", text):
-            score = 0.0
-
-    # 分类判定
-    if score > 0:
-        result = "正面"
-    elif score < 0:
-        result = "负面"
-    else:
-        result = "中性"
-
-    # 边界记录
-    if 0 < abs(score) <= 1.5:
-        _dict.record_borderline(text, score, result)
-
-    return (result, round(score, 1))
+    return json.loads(text)
 
 
-def analyze_file(input_path: str, output_path: str = None, no_update: bool = False) -> str:
-    """主分析流程：读取 JSON → 分类 → 写 EXCEL → 反思更新词典。"""
-    global _dict
-    _dict = DictManager()
+def analyze_file(
+    input_path: str,
+    output_path: str = None,
+    api_key: str = None,
+    model: str = "claude-sonnet-4-6",
+) -> str:
+    """主分析流程：读取 JSON → AI 逐条分类 → 写 EXCEL。"""
+    from anthropic import Anthropic
+
+    api_key = api_key or os.environ.get("ANTHROPIC_API_KEY")
+    if not api_key:
+        raise ValueError("请设置 ANTHROPIC_API_KEY 环境变量或通过 --api-key 参数提供")
+
+    client = Anthropic(api_key=api_key)
 
     input_path = Path(input_path)
     if not input_path.exists():
@@ -148,29 +88,79 @@ def analyze_file(input_path: str, output_path: str = None, no_update: bool = Fal
     with open(input_path, "r", encoding="utf-8") as f:
         data = json.load(f)
 
-    summary_rows = []
-    detail_rows = []
+    # 收集所有评论
+    all_comments = []  # [(post_idx, comment_idx, content)]
+    for pi, post in enumerate(data):
+        for ci, c in enumerate(post.get("comments", [])):
+            all_comments.append((pi, ci, c.get("content", "")))
 
-    for post in data:
+    total = len(all_comments)
+    results: dict[tuple[int, int], tuple[str, float]] = {}
+
+    # 分批处理
+    for batch_start in range(0, total, BATCH_SIZE):
+        batch_end = min(batch_start + BATCH_SIZE, total)
+        batch = all_comments[batch_start:batch_end]
+        batch_items = [(i, clean_text(content)) for i, (_, _, content) in enumerate(batch)]
+
+        # 过滤空评论（清洗后为空则直接标记中性）
+        non_empty = [(i, t) for i, t in batch_items if t]
+
+        print(f"\r分类进度: {batch_end}/{total}", end="", flush=True)
+
+        if non_empty:
+            for attempt in range(3):
+                try:
+                    batch_results = classify_batch(client, non_empty, model)
+                    for r in batch_results:
+                        idx_in_batch = r["index"]
+                        real_idx = batch_start + idx_in_batch
+                        pi, ci, _ = all_comments[real_idx]
+                        results[(pi, ci)] = (r["sentiment"], r["score"])
+                    break
+                except Exception as e:
+                    if attempt < 2:
+                        wait = (attempt + 1) * 2
+                        print(f"\n批次 {batch_start}-{batch_end} 失败: {e}, {wait}s 后重试...")
+                        time.sleep(wait)
+                    else:
+                        raise
+
+        # 空评论标记为中性
+        empty_indices = set(range(len(batch))) - {i for i, _ in non_empty}
+        for i in empty_indices:
+            real_idx = batch_start + i
+            pi, ci, _ = all_comments[real_idx]
+            results[(pi, ci)] = ("中性", 0.0)
+
+        # 速率限制
+        if batch_end < total:
+            time.sleep(0.3)
+
+    print()  # 换行
+
+    # 构建 EXCEL 数据
+    detail_rows = []
+    summary_rows = []
+
+    for pi, post in enumerate(data):
         author = post.get("author_nickname", "")
         created = post.get("created_at", "")
         content = post.get("note_text", "")
         like_count = post.get("comments_count_on_post", 0)
-        total = post.get("total_after_filter", len(post.get("comments", [])))
-
         comments = post.get("comments", [])
-        pos_count = 0
-        neg_count = 0
-        neu_count = 0
+        total_comment = post.get("total_after_filter", len(comments))
 
-        for c in comments:
-            sentiment, score = classify_sentiment(c.get("content", ""))
+        pos = neg = neu = 0
+
+        for ci, c in enumerate(comments):
+            sentiment, score = results.get((pi, ci), ("中性", 0.0))
             if sentiment == "正面":
-                pos_count += 1
+                pos += 1
             elif sentiment == "负面":
-                neg_count += 1
+                neg += 1
             else:
-                neu_count += 1
+                neu += 1
 
             detail_rows.append({
                 "微博作者": author,
@@ -182,41 +172,37 @@ def analyze_file(input_path: str, output_path: str = None, no_update: bool = Fal
                 "点赞数": c.get("like_count", 0),
             })
 
-        denom = total if total > 0 else 1
-        pos_pct = round(pos_count / denom * 100, 1)
-        neg_pct = round(neg_count / denom * 100, 1)
-        neu_pct = round(neu_count / denom * 100, 1)
+        denom = total_comment if total_comment > 0 else 1
+        pos_pct = round(pos / denom * 100, 1)
+        neg_pct = round(neg / denom * 100, 1)
+        neu_pct = round(neu / denom * 100, 1)
 
         summary_rows.append({
             "微博作者名称": author,
             "发布时间": created,
             "微博内容": content,
             "点赞数": like_count,
-            "评论数": total,
-            "正面数量": pos_count,
+            "评论数": total_comment,
+            "正面数量": pos,
             "正面占比": f"{pos_pct}%",
-            "负面数量": neg_count,
+            "负面数量": neg,
             "负面占比": f"{neg_pct}%",
-            "中性数量": neu_count,
+            "中性数量": neu,
             "中性占比": f"{neu_pct}%",
         })
 
-    # 写 EXCEL
     _write_excel(output_path, summary_rows, detail_rows)
 
-    total_comments = len(detail_rows)
-    print(f"处理完成: {len(data)} 篇帖子, {total_comments} 条评论")
-    print(f"输出文件: {output_path}")
+    # 统计摘要
+    total_pos = sum(1 for r in detail_rows if r["情感分类"] == "正面")
+    total_neg = sum(1 for r in detail_rows if r["情感分类"] == "负面")
+    total_neu = sum(1 for r in detail_rows if r["情感分类"] == "中性")
 
-    # 反思与词典更新
-    if not no_update:
-        _dict.data["meta"]["total_comments_analyzed"] += total_comments
-        _dict.commit_session()
-        report = _dict.reflect()
-        print()
-        print(report)
-    else:
-        print("(跳过词典更新)")
+    print(f"处理完成: {len(data)} 篇帖子, {total} 条评论")
+    print(f"  正面: {total_pos} ({round(total_pos / total * 100, 1)}%)")
+    print(f"  负面: {total_neg} ({round(total_neg / total * 100, 1)}%)")
+    print(f"  中性: {total_neu} ({round(total_neu / total * 100, 1)}%)")
+    print(f"输出文件: {output_path}")
 
     return str(output_path)
 
@@ -228,7 +214,7 @@ def _write_excel(path: Path, summary_rows: list, detail_rows: list) -> None:
 
     wb = Workbook()
 
-    # ── Sheet 1: 汇总 ──
+    # Sheet 1: 汇总
     ws1 = wb.active
     ws1.title = "汇总"
     s_headers = list(summary_rows[0].keys()) if summary_rows else []
@@ -236,14 +222,14 @@ def _write_excel(path: Path, summary_rows: list, detail_rows: list) -> None:
     for row in summary_rows:
         ws1.append([row.get(h, "") for h in s_headers])
 
-    # ── Sheet 2: 评论明细 ──
+    # Sheet 2: 评论明细
     ws2 = wb.create_sheet("评论明细")
     d_headers = list(detail_rows[0].keys()) if detail_rows else []
     ws2.append(d_headers)
     for row in detail_rows:
         ws2.append([row.get(h, "") for h in d_headers])
 
-    # ── 样式 ──
+    # 样式
     header_font = Font(bold=True, size=11)
     header_fill = PatternFill(start_color="D9E1F2", end_color="D9E1F2", fill_type="solid")
     wrap_align = Alignment(wrap_text=True, vertical="center")
@@ -270,40 +256,19 @@ def _write_excel(path: Path, summary_rows: list, detail_rows: list) -> None:
     wb.save(path)
 
 
-def cmd_stats():
-    """显示词典统计信息。"""
-    dm = DictManager()
-    stats = dm.get_stats()
-    print("=== 词典库统计 ===")
-    print(f"版本: v{stats['version']}  |  累计运行: {stats['total_runs']} 次")
-    print(f"正面词: {stats['positive_count']}  负面词: {stats['negative_count']}  问候语: {stats['greeting_count']}")
-    print(f"待审核候选词: {stats['candidate_count']}")
-    if stats["top_positive"]:
-        print("\n触发次数 Top5 正面词:")
-        for word, info in stats["top_positive"]:
-            print(f"  {word}  (×{info['count']})")
-    if stats["top_negative"]:
-        print("\n触发次数 Top5 负面词:")
-        for word, info in stats["top_negative"]:
-            print(f"  {word}  (×{info['count']})")
-
-
 def main():
-    parser = argparse.ArgumentParser(description="微博评论情感分类器（词典库驱动）")
-    parser.add_argument("-i", "--input", default=None, help="微博评论爬虫输出的 JSON 文件路径")
+    parser = argparse.ArgumentParser(description="微博评论情感分类器（AI 驱动）")
+    parser.add_argument("-i", "--input", required=True, help="微博评论爬虫输出的 JSON 文件路径")
     parser.add_argument("-o", "--output", default=None, help="EXCEL 输出路径（默认在输入文件同目录生成）")
-    parser.add_argument("--no-update", action="store_true", help="跳过词典库的自动反思更新")
-    parser.add_argument("--dict-stats", action="store_true", help="仅显示词典库统计信息")
+    parser.add_argument("--api-key", default=None, help="Anthropic API Key（默认从 ANTHROPIC_API_KEY 环境变量读取）")
+    parser.add_argument("--model", default="claude-sonnet-4-6", help="使用的模型（默认 claude-sonnet-4-6）")
+    parser.add_argument("--batch-size", type=int, default=40, help="每批处理的评论数（默认 40）")
     args = parser.parse_args()
 
-    if args.dict_stats:
-        cmd_stats()
-        return
+    global BATCH_SIZE
+    BATCH_SIZE = args.batch_size
 
-    if not args.input:
-        parser.error("必须指定 --input 或 --dict-stats")
-
-    analyze_file(args.input, args.output, no_update=args.no_update)
+    analyze_file(args.input, args.output, args.api_key, args.model)
 
 
 if __name__ == "__main__":
