@@ -2,8 +2,6 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-**回答必须使用中文。**
-
 ## 项目概述
 
 本仓库包含两个主要部分：
