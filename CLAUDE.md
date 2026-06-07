@@ -4,10 +4,12 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## 项目概述
 
-本仓库包含两个主要部分：
+本仓库包含三个主要部分：
 - **MediaCrawler** — 多平台自媒体爬虫（小红书、抖音、快手、B站、微博、贴吧、知乎）
 - **WeiboExtractData** — 微博评论爬取结果输出目录
-- **`.claude/skills/`** — 微博评论技能链：爬取 → 情感分类 → 话题聚类 → 舆情分析报告
+- **slides-workspace** — open-slide 幻灯片项目，用于将舆情分析结果生成演示文稿
+- **`.claude/skills/`** — 微博评论技能链：爬取 → 情感分类 → 话题聚类 → 舆情分析报告 → 幻灯片生成
+- **舆情分析/** — 舆情分析报告 Markdown 输出目录
 
 ## 常用命令
 
@@ -43,6 +45,19 @@ uv run python ../.claude/skills/weibo-sentiment-classifier/scripts/sentiment_cla
 
 # 运行测试
 cd MediaCrawler && uv run pytest
+
+# ─── open-slide 幻灯片相关 ───
+# 初始化幻灯片项目（首次使用需要）
+cd slides-workspace && npm install
+
+# 启动幻灯片开发服务器
+cd slides-workspace && npm run dev
+
+# 构建静态 HTML（输出到 slides-workspace/dist/）
+cd slides-workspace && npm run build
+
+# 预览构建结果
+cd slides-workspace && npm run preview
 ```
 
 ## 核心架构
@@ -107,18 +122,71 @@ IP 代理池支持，提供商包括快代理、豌豆HTTP 等。
 
 ## 微博技能链
 
-位于 `.claude/skills/`，四个技能形成完整分析流水线，均从 `MediaCrawler/` 目录执行。
+位于 `.claude/skills/`，五个技能形成完整分析流水线，均从 `MediaCrawler/` 目录执行。
 
 | 技能 | 功能 | 输入 | 输出 |
 |---|---|---|---|
 | `weibo-comment-scraper` | 爬取评论（含楼中楼递归） | 帖子URL/ID 或 用户ID+时间范围 | JSON |
 | `weibo-sentiment-classifier` | 情感分类（正面/负面/中性） | 爬虫输出的 JSON | EXCEL（汇总+明细） |
 | `weibo-topic-clusterer` | AI语义聚类，提取核心话题 | 爬虫输出的 JSON | AI分析结果（话题名/频次/代表评论） |
-| `weibo-opinion-analyzer` | 一键舆情分析，串联上述三步 | 日期 + 账号名 | Markdown 分析报告 |
+| `weibo-opinion-analyzer` | 一键舆情分析，串联上述三步 | 日期 + 账号名 | Markdown 分析报告 + 可选PPT |
+| `weibo-to-slides` | 舆情报告转演示文稿 | 分析报告 MD + 情感 EXCEL | open-slide React 幻灯片 |
 
 - 爬虫复用 MediaCrawler 的 `WeiboClient`，Cookie 认证，不启动浏览器
 - 情感分类由 Claude AI 直接在对话中逐条判断，无需外部 API 或本地词典
 - 输出目录：爬取结果 → `WeiboExtractData/`，分析报告 → `舆情分析/`
+- 幻灯片输出到 `slides-workspace/slides/`，基于 open-slide 框架（React + Vite）
+- 完整流水线：爬取 → 情感分类 → 话题聚类 → 报告 → **PPT演示文稿**
+
+## open-slide 幻灯片项目
+
+`slides-workspace/` 是基于 [open-slide](https://github.com/1weiho/open-slide) 框架的幻灯片项目，用于将舆情分析结果自动生成精美的演示文稿。
+
+### 项目结构
+
+```
+slides-workspace/
+├── slides/           # 幻灯片目录，每个子目录一个幻灯片
+│   └── <id>/
+│       ├── index.tsx # React 组件（1920×1080 画布）
+│       └── assets/   # 幻灯片专用资源
+├── themes/           # 主题定义（markdown 格式）
+├── assets/           # 全局资源
+└── .claude/skills/   # open-slide 自带技能（自动同步，不要手动修改）
+    ├── create-slide       # 创建新幻灯片
+    ├── slide-authoring    # 幻灯片编写技术参考
+    ├── apply-comments     # 应用检查器批注
+    ├── create-theme       # 创建/提取主题
+    └── current-slide      # 解析当前幻灯片上下文
+```
+
+### open-slide 命令
+
+```bash
+# 启动开发服务器（带 HMR 热更新）
+cd slides-workspace && npm run dev
+
+# 构建静态 HTML（输出到 dist/）
+cd slides-workspace && npm run build
+
+# 预览构建结果
+cd slides-workspace && npm run preview
+```
+
+### 幻灯片编写核心规则
+
+- 每个幻灯片是一组零参数 React 组件（`Page[]`），渲染到固定 1920×1080 画布
+- 文件结构：`export const design`（配色） + `export const meta`（元数据） + `export default [Page1, Page2, ...] satisfies Page[]`
+- 使用绝对像素值，内联 `style`，不引入额外依赖
+- 内容必须在 1080px 高度内（含 padding 100-160px），不可滚动
+- 详细规范见 `slides-workspace/.claude/skills/slide-authoring/SKILL.md`
+
+### 舆情→幻灯片集成
+
+1. 运行 `weibo-opinion-analyzer` 生成分析报告
+2. 调用 `weibo-to-slides` 技能，传入报告路径
+3. 幻灯片自动生成到 `slides-workspace/slides/<date>-<account>-report/index.tsx`
+4. `npm run dev` 实时预览，`npm run build` 构建部署
 
 ## CLAUDE.md 自动提交规范
 
