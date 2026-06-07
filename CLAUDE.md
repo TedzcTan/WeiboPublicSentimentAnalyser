@@ -122,10 +122,6 @@ IP 代理池支持，提供商包括快代理、豌豆HTTP 等。
 
 ## CLAUDE.md 自动提交规范
 
-当 CLAUDE.md 发生修改时，自动执行 git commit，无需用户确认：
-
-```bash
-git add CLAUDE.md && git commit -m "chore: 更新 CLAUDE.md 项目文档"
-```
-
-此规范适用于所有对 CLAUDE.md 的编辑，包括新增/修改/删除内容。提交信息统一使用上述格式。
+CLAUDE.md 及 `.claude/skills/` 的修改通过 `PostToolUse` hook 自动提交，无需手动执行 git 命令。Hook 配置在 `.claude/settings.local.json` 中，当 `Edit` 或 `Write` 工具修改了以下文件时自动触发：
+- `CLAUDE.md` → 提交信息 `chore: 更新 CLAUDE.md 项目文档`
+- `.claude/skills/` 目录下的文件 → 提交信息 `chore: 更新 Claude Code skills`
