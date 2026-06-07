@@ -35,7 +35,7 @@ import re
 import sys
 import unicodedata
 from collections import defaultdict
-from datetime import datetime
+from datetime import datetime, timedelta
 from email.utils import parsedate_to_datetime
 from typing import Dict, List, Optional, Tuple
 
@@ -88,6 +88,22 @@ def parse_cookie_input(raw: str) -> Tuple[str, Dict[str, str]]:
             cookie_dict[k.strip()] = v.strip()
     header = "; ".join(f"{k}={v}" for k, v in cookie_dict.items())
     return header, cookie_dict
+
+
+# Natural day boundary: 08:00 (skill.md definition)
+_NATURAL_DAY_OFFSET = timedelta(hours=8)
+
+
+def _to_natural_day(dt: datetime) -> str:
+    """
+    将 datetime 转换为自然日字符串 ``YYYY-MM-DD``。
+
+    自然日边界为 08:00：小于 08:00 的时刻归属前一日。
+    例如：2026-06-06 07:59 → "2026-06-05"
+         2026-06-06 08:00 → "2026-06-06"
+    """
+    adjusted = dt - _NATURAL_DAY_OFFSET
+    return adjusted.strftime("%Y-%m-%d")
 
 
 def _parse_datetime(value: str) -> datetime:
@@ -561,13 +577,13 @@ async def _main():
         print(f"Done: 0 posts, 0 comments → {dump_path}", file=sys.stderr)
         return
 
-    # Group results by natural day (parsed from created_at)
+    # Group results by natural day (08:00 boundary, per skill.md)
     day_groups: defaultdict = defaultdict(list)
     for r in results:
         try:
-            day_key = parsedate_to_datetime(r["created_at"]).strftime("%Y-%m-%d")
+            day_key = _to_natural_day(parsedate_to_datetime(r["created_at"]))
         except (ValueError, TypeError):
-            day_key = datetime.now().strftime("%Y-%m-%d")
+            day_key = _to_natural_day(datetime.now())
         day_groups[day_key].append(r)
 
     nickname = results[0]["author_nickname"]

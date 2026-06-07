@@ -21,6 +21,8 @@ description: 一键舆情分析。输入日期，自动爬取评论→情感分�
 
 按顺序执行以下步骤，前一步成功才进入下一步，任一步失败则终止并报错。
 
+**架构说明**：本技能是编排层，不重复描述各子技能的执行细节。第二步引用 `weibo-comment-scraper`，第三步引用 `weibo-sentiment-classifier`，第四步引用 `weibo-topic-clusterer`。详细命令和参数见各自 skill 文档。
+
 ### 第一步：解析用户输入
 
 从用户提示词中提取：
@@ -38,56 +40,27 @@ description: 一键舆情分析。输入日期，自动爬取评论→情感分�
 
 ### 第二步：爬取评论
 
-调用 weibo-comment-scraper 技能，使用用户时间范围模式：
+按照 `.claude/skills/weibo-comment-scraper/skill.md` 的「时间范围模式」执行。
 
-```bash
-cd MediaCrawler
-uv run python ../.claude/skills/weibo-comment-scraper/scripts/driver.py \
-    --user-id "{user_id}" \
-    --start-time "{start_time}" \
-    --end-time "{end_time}" \
-    --max-notes 100
-```
+参数：`--user-id {user_id} --start "{start_time}" --end "{end_time}"`
 
-- `--max-notes 100` 确保覆盖当天所有帖子
-- 输出文件会自动生成到 `WeiboExtractData/{微博用户名}/YYYY-MM-DD/` 目录
-- **记录输出目录**，后续步骤需要用到
-
-如果该日期没有帖子，提示用户"该日期无发布内容"并终止。
+输出：JSON 文件路径列表。
 
 ### 第三步：情感分类
 
-对上一步输出的 JSON 文件，调用 weibo-sentiment-classifier 技能：
+按照 `.claude/skills/weibo-sentiment-classifier/SKILL.md` 的工作流程执行。
 
-```bash
-cd MediaCrawler
-uv run python ../.claude/skills/weibo-sentiment-classifier/scripts/sentiment_classifier.py \
-    --input "{第二步输出的JSON文件路径}"
-```
+参数：`--input "{第二步的JSON文件路径}"`
 
-- 输出 EXCEL 文件自动在同目录生成（`{json_basename}_情感分析.xlsx`）
-- 命令行会打印处理总结（帖子数、评论数），记录备用
-- 如果跨天产生多个 JSON 文件，需要分别对每个文件调用情感分类
+对每个 JSON 文件逐个处理。输出：EXCEL 文件路径列表及其分类统计。
 
 ### 第四步：话题聚类
 
-使用 `weibo-topic-clusterer` 技能的 `extract_comments.py` 脚本提取代表评论：
+按照 `.claude/skills/weibo-topic-clusterer/skill.md` 的分析流程执行。
 
-```bash
-cd MediaCrawler
-uv run python ../.claude/skills/weibo-topic-clusterer/scripts/extract_comments.py \
-    --input "{第二步输出的JSON文件1}" \
-    --input "{第二步输出的JSON文件2}" \
-    --sentiment "{第三步输出的EXCEL文件1}" \
-    --sentiment "{第三步输出的EXCEL文件2}" \
-    --max-comments 200 --format text
-```
+参数：全部 JSON + 全部 EXCEL，`--max-comments 200 --format text`
 
-将提取的评论文本提供给 Claude AI 进行语义聚类，归纳 3-5 个核心话题，每个话题包含：
-- 话题名称
-- 提及次数
-- 情感倾向
-- 代表评论
+输出：结构化话题分析结果（话题名、提及次数、情感倾向、代表评论）。
 
 ### 第五步：计算补充统计数据
 

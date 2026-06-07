@@ -182,12 +182,36 @@ def print_comments_for_review(comments: list[dict]) -> None:
         print()
 
 
-def build_classification_dict(comments: list[dict]) -> dict[str, tuple[str, float]]:
-    """从 CLASSIFICATIONS 字典构建完整映射，缺失的默认标记为中性。"""
+def load_classifications_from_file(path: Path) -> dict[str, tuple[str, float]]:
+    """从外部 JSON 文件加载分类结果。
+
+    文件格式：{"comment_id": ["情感分类", 分数], ...}
+    """
+    with open(path, "r", encoding="utf-8") as f:
+        raw = json.load(f)
+    return {cid: (str(val[0]), float(val[1])) for cid, val in raw.items()}
+
+
+def build_classification_dict(
+    comments: list[dict],
+    file_path: Path | None = None,
+) -> dict[str, tuple[str, float]]:
+    """构建分类映射。
+
+    优先级：外部分类文件 > 内置 CLASSIFICATIONS 字典。
+    缺失的 comment_id 默认标记为中性。
+    """
+    if file_path and file_path.exists():
+        external = load_classifications_from_file(file_path)
+    else:
+        external = {}
+
     result = {}
     for c in comments:
         cid = c.get("comment_id", "")
-        if cid in CLASSIFICATIONS:
+        if cid in external:
+            result[cid] = external[cid]
+        elif cid in CLASSIFICATIONS:
             result[cid] = CLASSIFICATIONS[cid]
         else:
             result[cid] = ("中性", 0.0)
@@ -301,9 +325,18 @@ def write_excel(output_path: Path, data: list, classifications: dict[str, tuple[
 
 
 def main():
+    # 修复 Windows GBK 编码问题
+    import sys
+    try:
+        sys.stdout.reconfigure(encoding="utf-8")
+    except (AttributeError, OSError):
+        pass
+
     parser = argparse.ArgumentParser(
         description="微博评论情感分类器（Claude AI 直判，无需 API）"
     )
+    parser.add_argument("-c", "--classifications-file", default=None,
+                        help="外部分类结果 JSON 文件（格式：{\"comment_id\": [\"情感\", 分数]}）")
     parser.add_argument("-i", "--input", required=True, help="微博评论爬虫输出的 JSON 文件路径")
     parser.add_argument("-o", "--output", default=None, help="EXCEL 输出路径（默认在输入文件同目录生成）")
     parser.add_argument("--review", action="store_true",
@@ -329,21 +362,28 @@ def main():
         print_comments_for_review(comments)
         return
 
-    if not CLASSIFICATIONS:
+    cf_path = Path(args.classifications_file) if args.classifications_file else None
+
+    if not cf_path and not CLASSIFICATIONS:
         print("=" * 60)
-        print("CLASSIFICATIONS 字典为空。请按以下步骤操作：")
+        print("CLASSIFICATIONS 字典为空且未提供 --classifications-file。")
+        print("请按以下步骤操作：")
         print("=" * 60)
         print()
         print("1. 先运行 --review 模式查看所有评论：")
         print(f"   uv run python ../.claude/skills/weibo-sentiment-classifier/scripts/sentiment_classifier.py --input \"{args.input}\" --review")
         print()
-        print("2. Claude 逐条分析评论，将结果填入脚本顶部的 CLASSIFICATIONS 字典")
+        print("2. Claude 逐条分析评论，将结果写入分类 JSON 文件（或填入脚本内置 CLASSIFICATIONS 字典）")
         print("3. 重新运行脚本生成 EXCEL")
         print()
         print(f"共 {len(comments)} 条去重评论待分类。")
         return
 
-    classifications = build_classification_dict(comments)
+    if cf_path and not cf_path.exists():
+        print(f"ERROR: 分类文件不存在: {cf_path}", file=__import__("sys").stderr)
+        return
+
+    classifications = build_classification_dict(comments, cf_path)
     out = write_excel(output_path, data, classifications)
 
     # 统计

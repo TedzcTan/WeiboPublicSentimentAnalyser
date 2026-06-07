@@ -3,6 +3,17 @@ name: weibo-comment-scraper
 description: 爬取微博评论（含楼中楼递归）。支持指定帖子链接和用户时间范围两种模式。自动过滤作者回复、空内容和纯表情评论。
 ---
 
+## 执行模式
+
+本技能直接在对话上下文中执行，通过 **Bash 后台进程** 实现并行爬取，不依赖 Agent 子代理。
+
+- **单帖爬取**（`--url` / `--note-id`）：直接运行一次 driver.py
+- **用户时间范围**（`--user-id`）：发现 → 分组 → Bash 并行 worker → 合并 → 汇总
+- 每个 worker 是一个 Bash 后台进程（`&`），负责 5 个帖子的评论爬取
+- 并行完成后用 `merge_by_day.py` 将单帖 JSON 按自然日合并为一个文件
+
+---
+
 # 微博评论爬虫
 
 基于 MediaCrawler 的 API 客户端，爬取微博帖子的**全部评论**（包括嵌套的楼中楼子评论），
@@ -51,8 +62,97 @@ uv run python ../.claude/skills/weibo-comment-scraper/scripts/driver.py \
 如需使用其他 Cookie，通过 `--cookies` 指定字符串或文件路径即可。
 
 输出默认保存到 `ClaudeWorkSpace/WeiboExtractData/{微博用户名}/{YYYY-MM-DD}/` 目录下，也可通过 `-o` 自定义单个文件路径。文件名规则：
-- 单条微博模式：`{微博用户名}_{帖子发布时间戳(YYYYMMDD_HHMM)}.json`
-- 用户时间范围模式：`{微博用户名}_{YYYYMMDD}.json`（跨自然日自动拆分为多个文件）
+- 单条微博模式（`--note-id`）：每个帖子独立输出 `{微博用户名}_{发布时间戳(YYYYMMDD_HHMM)}.json`，并行完成后由 `merge_by_day.py` 合并
+- 用户时间范围模式（`--user-id`）：直接输出 `{微博用户名}_{YYYYMMDD}.json`（跨自然日自动拆分）
+- **最终结果**：无论哪种模式，每个自然日一个合并文件 `{微博用户名}_{YYYYMMDD}.json`
+
+## 自然日定义
+
+用户说"X月X日"时，时间范围统一为 **当日 08:00 至次日 08:00**。
+
+| 用户输入 | start_time | end_time |
+|---|---|---|
+| "6月6日" | `2026-06-06 08:00` | `2026-06-07 08:00` |
+| "6月6-7日" | `2026-06-06 08:00` | `2026-06-08 08:00` |
+| "6月6日0点" | `2026-06-06 00:00` | `2026-06-06 23:59` |
+
+用户明确指定时间时以用户为准。
+
+## 时间范围模式：发现 → 分组 → 并行 → 合并
+
+收到 `--user-id` + 时间范围任务后，按以下流程执行。
+
+### 第一步：发现帖子链接
+
+通过微博 API 翻页获取用户帖子，使用 `reference/discover.py` 收集时间范围内的全部 note_id：
+
+```bash
+cd MediaCrawler
+uv run python ../.claude/skills/weibo-comment-scraper/reference/discover.py \
+    --user-id "{user_id}" \
+    --start "{start_time}" \
+    --end "{end_time}" \
+    > _note_ids.txt
+```
+
+参数说明见 `reference/discover.py --help`。输出每行一个 note_id，stderr 输出总数。
+
+### 第二步：分组并行
+
+将 note_ids 按 5 个一组分成多个批次，每个批次写成一个 shell 脚本，然后全部并行执行：
+
+```bash
+cd MediaCrawler
+IDS=(id1 id2 id3 id4 id5 id6 id7 id8)  # 替换为实际列表
+
+BATCH_SIZE=5
+COUNT=0
+for ((i=0; i<${#IDS[@]}; i+=BATCH_SIZE)); do
+    COUNT=$((COUNT+1))
+    BATCH=("${IDS[@]:i:BATCH_SIZE}")
+    (
+        for nid in "${BATCH[@]}"; do
+            uv run python ../.claude/skills/weibo-comment-scraper/scripts/driver.py --note-id "$nid"
+        done
+        echo "BATCH_DONE:$COUNT"
+    ) &
+done
+
+echo "已启动 $COUNT 个并行 worker（每 worker 5 条）"
+wait
+echo "全部 worker 完成"
+```
+
+### 第三步：合并
+
+等待所有 worker 完成后，每个帖子各自生成了独立的 `{昵称}_{YYYYMMDD_HHMM}.json` 文件。
+使用 `merge_by_day.py` 将同一自然日的帖子合并为一个 JSON 文件，并清理原始散文件和根目录空文件：
+
+```bash
+cd MediaCrawler
+uv run python ../.claude/skills/weibo-comment-scraper/scripts/merge_by_day.py \
+    --base-dir ../WeiboExtractData --cleanup
+```
+
+合并后输出结构：
+
+```
+WeiboExtractData/
+├── {微博用户名}/
+│   └── {YYYY-MM-DD}/
+│       └── {微博用户名}_{YYYYMMDD}.json   ← 合并后的唯一结果
+```
+
+`merge_by_day.py` 参数：
+
+| 参数 | 说明 |
+|---|---|
+| `--base-dir` | WeiboExtractData 目录路径 |
+| `--nickname` | 可选，仅合并指定昵称的文件 |
+| `--cleanup` | 合并后删除原始单帖文件和根目录空文件 |
+| `--dry-run` | 仅扫描预览，不实际合并或删除 |
+
+合并后统计帖子总数、评论总数，汇总报告。
 
 ## 完整参数列表
 
