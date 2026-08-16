@@ -12,7 +12,8 @@
 自然日定义（与技能文档一致）：当日 08:00 至次日 08:00。
 帖子的 ``created_at`` 时间 < 08:00 时归属前一日，>= 08:00 时归属当日。
 
-同时清理：根目录下的空 ``weibo_*_HHMMSS.json``（无评论的帖子）。
+同时清理：根目录及 ``tmp/`` 下的空 ``weibo_*_HHMMSS.json``（爬取失败的帖子）。
+driver.py 在爬取失败时将空结果写入 ``WeiboExtractData/tmp/``，本脚本负责识别并清理。
 
 用法:
   cd MediaCrawler
@@ -125,8 +126,11 @@ def collect_files(
         fname = file_path.name
         rel_parent = file_path.parent
 
-        # Root-level empty files
-        if rel_parent == base and _is_root_empty_file(fname):
+        # Empty fallback files: root-level OR under tmp/ (driver.py writes
+        # failed-crawl empty results to WeiboExtractData/tmp/weibo_*.json)
+        if _is_root_empty_file(fname) and (
+            rel_parent == base or rel_parent == base / "tmp"
+        ):
             root_empty_files.append(file_path)
             continue
 

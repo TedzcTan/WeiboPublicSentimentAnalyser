@@ -126,7 +126,7 @@ echo "全部 worker 完成"
 ### 第三步：合并
 
 等待所有 worker 完成后，每个帖子各自生成了独立的 `{昵称}_{YYYYMMDD_HHMM}.json` 文件。
-使用 `merge_by_day.py` 将同一自然日的帖子合并为一个 JSON 文件，并清理原始散文件和根目录空文件：
+使用 `merge_by_day.py` 将同一自然日的帖子合并为一个 JSON 文件，并清理原始散文件、根目录及 `tmp/` 下的空文件（爬取失败的帖子）：
 
 ```bash
 cd MediaCrawler
@@ -149,7 +149,7 @@ WeiboExtractData/
 |---|---|
 | `--base-dir` | WeiboExtractData 目录路径 |
 | `--nickname` | 可选，仅合并指定昵称的文件 |
-| `--cleanup` | 合并后删除原始单帖文件和根目录空文件 |
+| `--cleanup` | 合并后删除原始单帖文件、根目录空文件及 `tmp/` 下的失败空文件 |
 | `--dry-run` | 仅扫描预览，不实际合并或删除 |
 
 合并后统计帖子总数、评论总数，汇总报告。
@@ -166,7 +166,7 @@ WeiboExtractData/
 | `--end-time` | 可选 | 结束日期或时间（默认当前时间） |
 | `--max-notes` | 可选 | 用户模式下最多扫描的帖子数（默认 50） |
 | `--max-comments` | 可选 | 每个帖子最多爬取的评论数（默认 99999 即全部） |
-| `-o` / `--output` | 可选 | JSON 输出文件路径（默认自动生成到 `../WeiboExtractData/weibo_时间戳.json`） |
+| `-o` / `--output` | 可选 | JSON 输出文件路径（默认自动生成；爬取失败时输出到 `WeiboExtractData/tmp/weibo_时间戳.json`） |
 
 `--url`、`--note-id`、`--user-id` 三者必须且只能提供一个。
 
@@ -236,7 +236,7 @@ WeiboExtractData/
 - **无需浏览器**：本脚本不启动 Playwright/Chromium。它复用了 MediaCrawler 的 `WeiboClient` 并通过存根对象替代浏览器依赖，所有 API 调用均通过 `httpx` + Cookie 完成。
 - **用户模式分页**：`--max-notes` 限制扫描的帖子总数（包括时间范围外的帖子也会被扫描但被过滤）。如果预期中的帖子没有出现，请增大该值（默认 50）。
 - **楼中楼深度**：微博 API 将子评论嵌套在父评论的 `comments` 字段中。脚本会递归遍历任意深度，但实际微博数据很少超过 2-3 层。
-- **输出目录**：不指定 `-o` 时，结果按 `WeiboExtractData/{微博用户名}/{YYYY-MM-DD}/` 层级自动分类存放。用户时间范围模式下，跨越多个自然日的数据会按天拆分到不同文件。
+- **输出目录**：不指定 `-o` 时，结果按 `WeiboExtractData/{微博用户名}/{YYYY-MM-DD}/` 层级自动分类存放。用户时间范围模式下，跨越多个自然日的数据会按天拆分到不同文件。**爬取失败**（无任何结果）时，空结果文件会写入 `WeiboExtractData/tmp/weibo_时间戳.json`，由 `merge_by_day.py --cleanup` 识别并清理。
 
 ## 验证码处理
 

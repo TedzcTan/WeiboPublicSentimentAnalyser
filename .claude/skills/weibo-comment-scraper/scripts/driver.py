@@ -569,9 +569,13 @@ async def _main():
     os.makedirs(out_dir, exist_ok=True)
 
     if not results:
+        # Failed crawl — write the empty fallback under tmp/ so the
+        # root WeiboExtractData dir stays clean. merge_by_day.py cleans these.
         ts = datetime.now().strftime("%Y%m%d_%H%M%S")
+        tmp_dir = os.path.join(out_dir, "tmp")
+        os.makedirs(tmp_dir, exist_ok=True)
         filename = re.sub(r'[\\/:*?"<>|]', '_', f"weibo_{ts}.json")
-        dump_path = os.path.join(out_dir, filename)
+        dump_path = os.path.join(tmp_dir, filename)
         with open(dump_path, "w", encoding="utf-8") as fh:
             fh.write(out_str)
         print(f"Done: 0 posts, 0 comments → {dump_path}", file=sys.stderr)
